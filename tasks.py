@@ -9,6 +9,8 @@ import platform
 import pyautogui
 import random
 
+stop_flag = False
+
 def get_screenshot():##根据操作系统获取屏幕截图
     system = platform.system()
 
@@ -54,12 +56,8 @@ def find_and_click_with_timeout(image_name, timeout=30):##带超时的查找和�
        if find_and_click(image_name):
            print(f"点击成功 {image_name}")
            return True
-       time.sleep(2)
+       time.sleep(1)
     return False
-
-    
-    print(f"超时 reached while trying to find {image_name}")
-    return False 
 
 def is_image_present(image_name, confidence=0.7):##计算匹配度 只观察不点击
     target = cv2.imread(get_path(image_name))
@@ -76,13 +74,13 @@ def is_image_present(image_name, confidence=0.7):##计算匹配度 只观察不�
 def click_until_gone(image_name, max_attempts=10):###点击直到图像消失
     for i in range(max_attempts):
         if find_and_click(image_name):
-            time.sleep(3)
+            time.sleep(1)
         else:
             if not is_image_present(image_name):
                 print(f"{image_name} 已消失.")
                 return True
             else:
-                time.sleep(2)
+                time.sleep(1)
     return False
 
 def find_and_press(image_name, key, confidence=0.8):###查找图像并按下指定键
@@ -98,4 +96,16 @@ def find_and_press(image_name, key, confidence=0.8):###查找图像并按下指�
         print(f"检测到 {image_name}, 正在按下 {key}.")
         pyautogui.press(key)
         return True
+    return False
+
+def press_until_gone(image_name, key ,max_attempts=10, confidence=0.8):
+    for i in range(max_attempts):
+        if is_image_present(image_name, confidence):
+            print(f"检测到{image_name},按下{key}(第{i+1}/{max_attempts}次)")
+            pyautogui.press(key)
+            time.sleep(1)
+        else:
+            print(f"{image_name}已消失")
+            return True
+    print(f"尝试{max_attempts}次后{image_name}仍未消失")
     return False
