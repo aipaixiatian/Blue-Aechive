@@ -8,6 +8,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
 
       - name: Set up Python
@@ -28,3 +29,21 @@ jobs:
         with:
           name: Momotalk
           path: dist/桃信助手.exe
+=======
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        pip install pyautogui opencv-python numpy pyinstaller
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller -F --add-data "*.png;." --hidden-import=tkinter --hidden-import=tkinter.scrolledtext gui.py
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: momotalk
+        path: dist/"桃信助手".exe
+>>>>>>> 68da9d29840be1f0a9867092356dea8c1c60783c
