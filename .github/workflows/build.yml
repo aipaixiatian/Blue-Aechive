@@ -22,5 +22,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Blue-Aechive-Exe
-        path: dist/gui.exe
+        name: momotalk
+        path: dist/"桃信助手".exe
