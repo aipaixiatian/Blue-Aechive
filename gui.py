@@ -110,25 +110,40 @@ class AutoScriptGUI:
         try:
             while self.running:
                 for func, image, extra, desc in self.task_sequence:
+                    # 检查停止标志
                     if not self.running or tasks.stop_flag:
                         return
 
-                    if is_image_present('my.png', confidence=0.9):
-                        self.log("✅ 已完成（检测到 my.png）")
+                    # 检查是否完成（适配新返回值）
+                    present, check_msg = is_image_present('my.png', confidence=0.9)
+                    if present:
+                        self.log(f"✅ 已完成（检测到 my.png）{check_msg}")
                         self.set_status("已完成")
                         self._finish_ui()
                         return
 
-                    self.log(f"▶ 任务中: {desc}")
+                    self.log(f"▶ 执行: {desc}")
                     self.set_status(f"执行中: {desc}")
 
                     try:
+                        # ---------- 这里是关键改动 ----------
                         if extra is not None:
-                            func(image, extra)
+                            success, detail_msg = func(image, extra)
                         else:
-                            func(image)
+                            success, detail_msg = func(image)
+                        # ------------------------------------
+
+                        # 根据返回值打印详细日志
+                        if success:
+                            self.log(f"   ✅ {detail_msg}")
+                        else:
+                            self.log(f"   ❌ {detail_msg}")
+                            self.set_status(f"步骤失败: {desc}")
+                            # 关键步骤失败，建议停止脚本，避免卡死
+                            self.log("⚠️ 因步骤失败，脚本已自动停止")
+                            return
                     except Exception as e:
-                        self.log(f"❌ 任务执行出错: {e}")
+                        self.log(f"❌ 任务执行异常: {e}")
                         self.set_status("出错")
                         return
 
@@ -140,6 +155,7 @@ class AutoScriptGUI:
             self.log(f"❌ 脚本异常: {e}")
             self.set_status("异常")
         finally:
+            # 确保停止时恢复 UI 状态
             if not self.running or tasks.stop_flag:
                 self.root.after(0, self._finish_ui)
 
